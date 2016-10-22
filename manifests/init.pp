@@ -38,8 +38,47 @@ class ldap_entry(
     }
 
   })
+
+  ldap::object { "dc=${cn},${base}":
+    ensure     => present,
+    authtype   => 'EXTERNAL',
+    attributes => {
+      'objectClass' => [
+        'domain',
+        'top',
+        'gosaDepartment',
+      ],
+      'dc'          => $cn,
+      'ou'          => $cn,
+      'description' => $cn,
+    },
+  }
   
-  ldap::object { "cn=${cn},${base}":
+  ldap::object { "ou=systems,dc=${cn},${base}":
+    ensure     => present,
+    authtype   => 'EXTERNAL',
+    attributes => {
+      'objectClass' => [
+        'organizationalUnit',
+      ],
+      'ou'          => 'systems',
+    },
+    require    => Ldap::Object["dc=${cn},${base}"],
+  }
+  
+  ldap::object { "ou=servers,ou=systems,dc=${cn},${base}":
+    ensure     => present,
+    authtype   => 'EXTERNAL',
+    attributes => {
+      'objectClass' => [
+        'organizationalUnit',
+      ],
+      'ou'          => 'servers',
+    },
+    require    => Ldap::Object["ou=systems,dc=${cn},${base}"],
+  }
+
+  ldap::object { "cn=${cn},ou=servers,ou=systems,dc=${cn},${base}":
     ensure     => present,
     authtype   => 'EXTERNAL',
     attributes => {
@@ -47,19 +86,20 @@ class ldap_entry(
       'objectClass'  => [
         'device',
         'ipHost',
-        'ieee802Device',
+        'goServer',
         'puppetClient',
       ],
       'ipHostNumber' => $ip4 + $ip6,
       'macAddress'   => $macs,
       'environment'  => $::envirionment,
     },
+    require    => Ldap::Object["ou=servers,ou=systems,dc=${cn},${base}"],
   }
 
-  ldap::object { "ou=dns,cn=${cn},${base}":
+  ldap::object { "ou=dns,dc=${cn},${base}":
     ensure     => present,
     authtype   => 'EXTERNAL',
-    require    => Ldap::Object["cn=${cn},${base}"],
+    require    => Ldap::Object["dc=${cn},${base}"],
     attributes => {
       'objectClass' => [
         'organizationalUnit',
@@ -76,10 +116,10 @@ class ldap_entry(
       $first = $ip[0,size($prefix)]
 
       if $first == $prefix {
-        ldap::object { "zonename=${zone},ou=dns,cn=${cn},${base}":
+        ldap::object { "zonename=${zone},ou=dns,dc=${cn},${base}":
           ensure     => present,
           authtype   => 'EXTERNAL',
-          require    => Ldap::Object["ou=dns,cn=${cn},${base}"],
+          require    => Ldap::Object["ou=dns,dc=${cn},${base}"],
           attributes => {
             'objectClass'        => [
               'dNSZone',

@@ -1,6 +1,6 @@
 {
   "name": "thexa4-ldap_entry",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Max Maton",
   "summary": "Adds client specific ldap entries to ldap",
   "source": "https://github.com/thexa4/puppet-ldap_entry",
