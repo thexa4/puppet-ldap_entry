@@ -3,8 +3,10 @@
   "version": "0.2.0",
   "author": "Max Maton",
   "summary": "Adds client specific ldap entries to ldap",
-  "source": "https://github.com/thexa4/puppet-ldap_entry",
   "license": "MIT",
+  "source": "https://github.com/thexa4/puppet-ldap_entry",
+  "project_page": "https://github.com/thexa4/puppet-ldap_entry",
+  "issues_url": "https://github.com/thexa4/puppet-ldap_entry/issues",
   "dependencies": [
     {"name":"thexa4/ldap","version_requirement":">= 0.2.0"},
     {"name":"puppetlabs/stdlib","version_requirement":">= 4.0.0"}

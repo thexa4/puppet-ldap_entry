@@ -91,7 +91,7 @@ class ldap_entry(
       ],
       'ipHostNumber' => $ip4 + $ip6,
       'macAddress'   => $macs,
-      'environment'  => $::envirionment,
+      'environment'  => $server_facts['environment'],
     },
     require    => Ldap::Object["ou=servers,ou=systems,dc=${cn},${base}"],
   }
