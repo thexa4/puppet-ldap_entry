@@ -49,7 +49,7 @@ class ldap_entry(
   }
 
   if empty($ip6) and empty($ip4) {
-    notify { "Unable to detect ip addresses. Interfaces detected: $all_ifs": }
+    notify { "Unable to detect ip addresses. Interfaces detected: ${all_ifs}": }
   }
 
   ldap::object { "dc=${cn},${base}":

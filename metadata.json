@@ -1,6 +1,6 @@
 {
   "name": "thexa4-ldap_entry",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "author": "Max Maton",
   "summary": "Adds client specific ldap entries to ldap",
   "license": "MIT",
