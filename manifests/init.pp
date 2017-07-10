@@ -3,41 +3,54 @@ class ldap_entry(
   $domains,
 ){
 
-  $all_ifs = $::facts['networking']['interfaces']
-  $physical_ifs = $all_ifs.filter |$if| { $if[0] =~ /^eth/ }
   $cn = $::trusted['hostname'];
+  if $::facts['networking'] == undef {
+    $all_ifs = split($::facts['interfaces'],',')
+    $physical_ifs = $all_ifs.filter |$if| { $if =~ /^eth/ }
+    
+    $macs = $physical_ifs.map |$if| { $::facts["macaddress_$if"] }
+    $ip4 = $physical_ifs.map |$if| { $::facts["ipaddress_$if"] }
+    $ip6 = $physical_ifs.map |$if| { $::facts["ipaddress6_$if"] }
+  } else {
+    $all_ifs = $::facts['networking']['interfaces']
+    $physical_ifs = $all_ifs.filter |$if| { $if[0] =~ /^eth/ }
 
-  $macs = $physical_ifs.map |$if| { $if[1]['mac'] }
-  $ip4 = flatten($all_ifs.map |$if| {
-    if empty($if[1]['bindings']) {
-      []
-    } else {
-      $filtered = $if[1]['bindings'].filter |$bind| {
-        $bind['address'] =~ /^192/
-      }
-      if (empty($filtered)) {
+    $macs = $physical_ifs.map |$if| { $if[1]['mac'] }
+    $ip4 = flatten($all_ifs.map |$if| {
+      if empty($if[1]['bindings']) {
         []
       } else {
-        $filtered.map |$bind| { $bind['address'] }
+        $filtered = $if[1]['bindings'].filter |$bind| {
+          $bind['address'] =~ /^192/
+        }
+        if (empty($filtered)) {
+          []
+        } else {
+          $filtered.map |$bind| { $bind['address'] }
+        }
       }
-    }
 
-  })
-  $ip6 = flatten($all_ifs.map |$if| {
-    if empty($if[1]['bindings6']) {
-      []
-    } else {
-      $filtered = $if[1]['bindings6'].filter |$bind| {
-        $bind['address'] =~ /^[23]/
-      }
-      if (empty($filtered)) {
+    })
+    $ip6 = flatten($all_ifs.map |$if| {
+      if empty($if[1]['bindings6']) {
         []
       } else {
-        $filtered.map |$bind| { $bind['address'] }
+        $filtered = $if[1]['bindings6'].filter |$bind| {
+          $bind['address'] =~ /^[23]/
+        }
+        if (empty($filtered)) {
+          []
+        } else {
+          $filtered.map |$bind| { $bind['address'] }
+        }
       }
-    }
 
-  })
+    })
+  }
+
+  if empty($ip6) and empty($ip4) {
+    notify { "Unable to detect ip addresses. Interfaces detected: $all_ifs": }
+  }
 
   ldap::object { "dc=${cn},${base}":
     ensure     => present,
